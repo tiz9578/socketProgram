@@ -52,10 +52,10 @@ while 1:
         print ("Timeout Error:",errTime)
         serverSocket.sendto('Timeout Error', clientAddress)
         sys.exit(1)
-    #except:
-     #   print ("Generic Error")
-      #  serverSocket.sendto('Generic Error', clientAddress)
-       # sys.exit(1)
+    except:
+       print ("Generic Error")
+       serverSocket.sendto('Generic Error', clientAddress)
+       sys.exit(1)
     
     
     # Check the file size
