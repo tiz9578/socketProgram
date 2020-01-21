@@ -8,6 +8,7 @@ from requests import *
 import requests
 import os
 import sys
+import time
 from timeit import default_timer as timer
 from test.test_sax import start
 from curses import start_color
@@ -23,6 +24,14 @@ serverSocket.listen(1)
 print 'The server is ready to receive'
 while 1:
     connectionSocket, addr = serverSocket.accept()
+    
+    connect_from_client = connectionSocket.recv(4000)
+    print 'From client: '+ connect_from_client
+    
+    accept_connection = 'accept'
+    connectionSocket.send(accept_connection)
+    
+    
     fileurl = connectionSocket.recv(4000)
     #Try to get the total time for the process
     start = timer()
@@ -42,7 +51,11 @@ while 1:
         print ("Timeout Error:",errTime)
         connectionSocket.send('Timeout error')
         sys.exit(1)
-    
+    #except:
+     #   print ("Generic Error")
+      #  serverSocket.sendto('Generic Error', clientAddress)
+       # sys.exit(1)
+
     
     # Check the file size
     fileSize = r.headers['Content-length']
@@ -59,15 +72,34 @@ while 1:
     # Create an empty file to store the content of the file
     open(fileToClient, 'wb').write(r.content)
     
+    message = "clientFile"+fileToClient
+    connectionSocket.send(message)
     
     #First: send the size of the file from the header to the client to compare
 
-    connectionSocket.send(fileSize)
+    #connectionSocket.send(fileSize)
     
     
     #Second send the file to client
     
-    connectionSocket.send(fileToClient)
+    #connectionSocket.send(fileToClient)
+    
+    f=open(fileToClient,"rb")
+    #dataTosend = f.read(1024)
+    dataTosend = f.read(1024)
+    #print dataTosend
+    while (dataTosend):
+        #connectionSocket.send(dataTosend)
+        if(connectionSocket.send(dataTosend)):
+       # print "sending ..."
+      # print dataTosend
+            dataTosend = f.read(1024)
+            time.sleep(0.02)# Give receiver a bit time to save
+    #connectionSocket.send(dataTosend)##############
+           #print "sending ..."
+    #######################       dataTosend = f.read(1024)
+    f.close()
+    #serverSocket.shutdown(socket.SHUT_WR)
     
     
     
