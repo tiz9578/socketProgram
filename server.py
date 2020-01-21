@@ -21,9 +21,12 @@ serverSocket.bind(('',serverPort))
 
 serverSocket.listen(1)
 
+#server in listening mode
 print 'The server is ready to receive'
 while 1:
     connectionSocket, addr = serverSocket.accept()
+    
+    # Connect - accept messages
     
     connect_from_client = connectionSocket.recv(4000)
     print 'From client: '+ connect_from_client
@@ -31,78 +34,74 @@ while 1:
     accept_connection = 'accept'
     connectionSocket.send(accept_connection)
     
+    # Get the URL from the client
     
     fileurl = connectionSocket.recv(4000)
+    
     #Try to get the total time for the process
+    
     start = timer()
+    
+    # Get the file from the URL sent by the client. 
+    # In order to deal with exceptions we implement a try-except block
+    # we use exceptions from the "requests" module. 
+    # On the server we have the specific error - HTTP, Connection, Timeout
+    # or a generic error. A message is sent to the client.
 
     try:
         r = requests.get(fileurl, allow_redirects=True)
         r.raise_for_status() 
     except requests.exceptions.HTTPError as err:
         print err
-        connectionSocket.send('Http error')
+        connectionSocket.send('Http Error')
         sys.exit(1)
     except requests.exceptions.ConnectionError as errcon:
         print ("Error Connecting:",errcon)
-        connectionSocket.send('Connection error')
+        connectionSocket.send('Connection Error')
         sys.exit(1)
     except requests.exceptions.Timeout as errTime:
         print ("Timeout Error:",errTime)
-        connectionSocket.send('Timeout error')
+        connectionSocket.send('Timeout Error')
         sys.exit(1)
     except:
-       print ("Generic Error")
-       serverSocket.sendto('Generic Error', clientAddress)
-       sys.exit(1)
+        print ("Generic Error")
+        connectionSocket.send('Generic Error')
+        sys.exit(1)
 
     
-    # Check the file size
+    # Optional: check the file size from the headers
     fileSize = r.headers['Content-length']
     
     print 'Client request new file. Size of the file: ', fileSize
         
    
     # Find the name of the file based on URL
+    
     if fileurl.find('/'):
         print 'Getting ' + fileurl.rsplit('/', 1)[1]
         fileToClient = fileurl.rsplit('/', 1)[1]
     
     
-    # Create an empty file to store the content of the file
+    # Create an empty file to store the content of the file and open in write mode
     open(fileToClient, 'wb').write(r.content)
+    
+    #First: send the name of the file. We add "clientFile" to the name of the file
     
     message = "clientFile"+fileToClient
     connectionSocket.send(message)
-    
-    #First: send the size of the file from the header to the client to compare
 
-    #connectionSocket.send(fileSize)
+    
+    #Second send the file to client. This is the main part
     
     
-    #Second send the file to client
-    
-    #connectionSocket.send(fileToClient)
-    
-    f=open(fileToClient,"rb")
-    #dataTosend = f.read(1024)
+    f=open(fileToClient,"rb") #Open the file in read mode 
     dataTosend = f.read(1024)
-    #print dataTosend
     while (dataTosend):
-        #connectionSocket.send(dataTosend)
         if(connectionSocket.send(dataTosend)):
-       # print "sending ..."
-      # print dataTosend
             dataTosend = f.read(1024)
             time.sleep(0.02)# Give receiver a bit time to save
-    #connectionSocket.send(dataTosend)##############
-           #print "sending ..."
-    #######################       dataTosend = f.read(1024)
     f.close()
-    #serverSocket.shutdown(socket.SHUT_WR)
-    
-    
-    
+      
     # Then wait for the BYE message from the client in order to close
     
     byeMessage = connectionSocket.recv(4000)
@@ -111,6 +110,7 @@ while 1:
         print 'BYE message arrived, closing connection'
         
         # Now stop the timer, compute the elapsed time and send it to the client
+        
         end = timer()
         totTime = (end - start)
         print 'Total time: ', totTime, 'sec.'
@@ -118,4 +118,5 @@ while 1:
         connectionSocket.send(str(totTime))
         
         #Then close the connection
+        
         connectionSocket.close()
