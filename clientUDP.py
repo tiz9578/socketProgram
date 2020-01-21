@@ -17,6 +17,13 @@ clientSocket = socket(AF_INET, SOCK_DGRAM)
 
 #clientSocket.connect((serverName,serverPort))
 
+message = 'connect'
+clientSocket.sendto(message,(serverName, serverPort))
+
+accept_from_server, serverAddress = clientSocket.recvfrom(1024)
+print 'From server: ' + accept_from_server
+
+
 fileToget = raw_input('Url to get :')
 
 #clientSocket.send(fileToget)
@@ -24,40 +31,59 @@ fileToget = raw_input('Url to get :')
 clientSocket.sendto(fileToget,(serverName, serverPort))
 
 
-try:
+#try:
     #fileSizeFromServer = int(clientSocket.recv(4000))
-    fileSizeFromServer, serverAddress = clientSocket.recvfrom(2048)
-    if 'Error' in fileSizeFromServer:
+ #   fileSizeFromServer, serverAddress = clientSocket.recvfrom(2048)
+  #  if 'Error' in fileSizeFromServer:
+   #     print "Error, the Server was unable to get the file"
+    #    clientSocket.close()
+     #   sys.exit(1)
+        
+   
+
+#except ValueError:
+ #   print "Error, the Server was unable to get the file"
+  #  sys.exit(1)
+    
+
+#fileFromServer = clientSocket.recv(4000)
+fileFromServer, serverAddress = clientSocket.recvfrom(1024)
+if 'Error' in fileFromServer:
         print "Error, the Server was unable to get the file"
         clientSocket.close()
         sys.exit(1)
         
-   
+print "Received File:",fileFromServer.strip()
+f = open(fileFromServer.strip(),'wb')
 
-except ValueError:
-    print "Error, the Server was unable to get the file"
-    sys.exit(1)
-    
+fileFromServer, serverAddress = clientSocket.recvfrom(1024)
+try:
+    while(fileFromServer):
+        f.write(fileFromServer)
+        clientSocket.settimeout(2)
+        fileFromServer,addr = clientSocket.recvfrom(1024)
+except timeout:
+    f.close()
+  
+    print "File Downloaded"
 
-#fileFromServer = clientSocket.recv(4000)
-fileFromServer, serverAddress = clientSocket.recvfrom(2048)
 
 
-print 'From Server:', fileFromServer
+#print 'From Server:', fileFromServer
 
 
 #Check the size of the file downloaded
-fileSize = int (os.path.getsize(fileFromServer))
-print 'File size downloaded from server: ', fileSize
+#fileSize = int (os.path.getsize(fileFromServer))
+#print 'File size downloaded from server: ', fileSize
 
 #Compare size of the file with info coming from the server
 
-fileSizeFromServerInt = int(fileSizeFromServer)
-if fileSizeFromServerInt == fileSize:
-    print 'File arrived ..sending BYE to server'
-else: 
-    print 'Files have not the same size: something wrong. Exiting'
-    sys.exit(1)
+#fileSizeFromServerInt = int(fileSizeFromServer)
+#if fileSizeFromServerInt == fileSize:
+ #   print 'File arrived ..sending BYE to server'
+#else: 
+ #   print 'Files have not the same size: something wrong. Exiting'
+  #  sys.exit(1)
         
 #clientSocket.send('BYE')
 clientSocket.sendto('BYE',(serverName, serverPort))
