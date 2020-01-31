@@ -1,6 +1,5 @@
 '''
 Created on Jan 17, 2020
-
 @author: tiz - UDP Server
 '''
 from socket import *
