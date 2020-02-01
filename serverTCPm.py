@@ -129,7 +129,6 @@ def client_thread(connectionSocket):
         
 while True:
     # blocking call, waits to accept a connection
-    #conn, addr = s.accept()
     connectionSocket, addr = serverSocket.accept()
     print("[-] Connected to " + addr[0] + ":" + str(addr[1]))
 
