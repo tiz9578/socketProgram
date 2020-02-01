@@ -6,13 +6,8 @@ Created on Jan 17, 2020
 from socket import *
 from requests import *
 import requests
-import os
-import sys
 import time
 from timeit import default_timer as timer
-from test.test_sax import start
-from curses import start_color
-from matplotlib.backends._macosx import Timer
 from thread import start_new_thread
   
 
