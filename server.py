@@ -5,13 +5,10 @@ Created on Jan 17, 2020
 from socket import *
 from requests import *
 import requests
-import os
 import sys
 import time
 from timeit import default_timer as timer
 from test.test_sax import start
-from curses import start_color
-from matplotlib.backends._macosx import Timer
 
 serverPort = 4000
 serverSocket = socket(AF_INET,SOCK_STREAM)
