@@ -3,8 +3,6 @@ Created on Jan 17, 2020
 @author: tiz Client TCP
 '''
 from socket import *
-import os.path
-from os import path
 import sys
 
 serverName = 'localhost'
