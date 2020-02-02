@@ -5,7 +5,6 @@ Created on Jan 17, 2020
 from socket import *
 from requests import *
 import requests
-import os
 import sys
 from timeit import default_timer as timer
 import time
