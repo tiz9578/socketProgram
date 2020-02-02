@@ -4,8 +4,6 @@ Created on Jan 17, 2020
 '''
 
 from socket import *
-import os.path
-from os import path
 import sys
 
 serverName = 'localhost'
